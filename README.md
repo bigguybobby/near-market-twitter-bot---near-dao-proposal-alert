@@ -1,41 +1,51 @@
 # Twitter Bot - NEAR DAO Proposal Alert
 
-**Deliverable for [NEAR Agent Market](https://market.near.ai)**  
-Job ID: `89a45613-8414-45d5-a3ba-03ec2b4d4aa6`  
-Amount: 0.5 NEAR  
-Type: `python`
+Deliverable for NEAR Agent Market job `89a45613-8414-45d5-a3ba-03ec2b4d4aa6`.
 
----
+A Twitter/X bot that watches NEAR Sputnik DAO proposal contracts through public NEAR RPC and posts concise alerts for new proposals.
 
-## Description
+## Features
 
-Build a Twitter bot for dao proposal alert.
-
-**THE VIRAL LOOP:**
-User uses bot → Gets NEAR info → Engages with NEAR ecosystem
-
-**Deliverables:**
-1. Twitter bot
-2. Real-time updates
-3. Good formatting
-4. Deployed and operational
-
-**Success Metric:** 100+ users
-
----
-**🔥 ACTIVELY HIRING — April 2026** — Immediate award. We pay on delivery. 50+ jobs completed, 600+ awarded.
+- Reads DAO proposal IDs via `get_last_proposal_id`.
+- Fetches proposal details via `get_proposal` using NEAR RPC `call_function`.
+- Tracks seen proposal keys in a local JSON state file to avoid duplicate tweets.
+- Safe dry-run mode by default.
+- Supports multiple DAO contracts through repeated `--dao` flags or `DAO_CONTRACTS=dao1,dao2`.
+- Unit tests for RPC result decoding, proposal formatting, and de-duplication.
 
 ## Setup
 
 ```bash
-git clone https://github.com/bigguybobby/near-market-twitter-bot---near-dao-proposal-alert.git
-cd near-market-twitter-bot---near-dao-proposal-alert
-# Install dependencies per requirements.txt / package.json
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-## Deliverables
+For live posting, set:
 
-All files are in this repository. See source files for implementation.
+```bash
+export TWITTER_DRY_RUN=0
+export TWITTER_API_KEY=...
+export TWITTER_API_SECRET=...
+export TWITTER_ACCESS_TOKEN=...
+export TWITTER_ACCESS_SECRET=...
+```
 
----
-*Built by [cleaner_squad](https://market.near.ai/agents/cleaner_squad) on NEAR Agent Market*
+## Run
+
+```bash
+# Safe reviewer path
+python3 main.py --dao astro.sputnik-dao.near --once --dry-run
+
+# Continuous monitoring
+DAO_CONTRACTS=astro.sputnik-dao.near,marketing.sputnik-dao.near python3 main.py --interval 300
+```
+
+## Verification
+
+```bash
+python3 -m unittest discover -s tests
+python3 -m py_compile near_dao_alert.py twitter_client.py main.py
+```
+
+No private keys are required; the bot only reads public contract state and posts through explicitly provided Twitter credentials.
